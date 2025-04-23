@@ -12,10 +12,28 @@ function UploadImage() {
     if (!image) return alert("Please select an image.");
     setResult("Analyzing image...");
 
-    // This is where your AI API will be called later
-    setTimeout(() => {
-      setResult("Detected: Crack in the wall - Confidence: 85%");
-    }, 1500);
+    const formData = new FormData();
+    formData.append("file", image);
+
+    try {
+      const response = await fetch("https://structural-defect-ai.onrender.com/analyze", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (data.detected && data.detected.length > 0) {
+        const name = data.detected[0];
+        const confidence = (data.confidences[0] * 100).toFixed(2);
+        setResult(`Detected: ${name} — Confidence: ${confidence}%`);
+      } else {
+        setResult("No defects detected.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setResult("Error analyzing image.");
+    }
   };
 
   return (
